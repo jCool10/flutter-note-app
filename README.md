@@ -8,5 +8,5 @@
 ![Screenshot from 2023-11-24 21-12-12](https://github.com/jCool10/flutter-note-app/assets/73897430/ea1b134c-5cf1-48ce-866c-f653d54a22dc)
 ![Screenshot from 2023-11-24 21-12-45](https://github.com/jCool10/flutter-note-app/assets/73897430/a563c091-c458-400c-9541-2af449ce3c18)
 
-
-
+![Screenshot from 2023-11-25 00-26-11](https://github.com/jCool10/flutter-note-app/assets/73897430/92d5fb76-e555-4329-8055-3c301388769d)
+![Screenshot from 2023-11-25 00-26-28](https://github.com/jCool10/flutter-note-app/assets/73897430/e15b4cd5-bad8-4c9d-a9d7-b7998a3c3448)
