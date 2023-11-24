@@ -1,5 +1,5 @@
 # flutter-note-app
-Screenshotes
+
 ![Screenshot from 2023-11-24 21-11-30](https://github.com/jCool10/flutter-note-app/assets/73897430/bac2a790-2f79-483f-87b2-afa806c03d6a)
 ![Screenshot from 2023-11-24 21-11-36](https://github.com/jCool10/flutter-note-app/assets/73897430/e944564b-6785-4987-a997-725d9d4e693a)
 
