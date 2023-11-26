@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_auth/Screens/Verifaction/forgot.dart';
 import 'package:flutter_auth/contants.dart';
 
 class ResetAccount extends StatelessWidget {
@@ -20,7 +21,14 @@ class ResetAccount extends StatelessWidget {
           style: TextStyle(color: kPrimaryColor),
         ),
         GestureDetector(
-          onTap: press,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) {
+                return ForgotScreen();
+              }),
+            );
+          },
           child: Text(
             " Reset Now",
             style: TextStyle(color: kPrimaryColor, fontWeight: FontWeight.bold),
