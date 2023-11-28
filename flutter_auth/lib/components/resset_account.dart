@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_auth/Screens/Verifaction/forgot.dart';
+import 'package:flutter_auth/Screens/Forgot/forgot_screen.dart';
+
 import 'package:flutter_auth/contants.dart';
 
 class ResetAccount extends StatelessWidget {
