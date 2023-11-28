@@ -3,10 +3,10 @@ import 'package:note_list_app/components/text_field_container.dart';
 import 'package:note_list_app/contants.dart';
 
 class RoundedConfirmPasswordField extends StatelessWidget {
-  final ValueChanged<String> onChanged;
+  final TextEditingController controller;
   const RoundedConfirmPasswordField({
     super.key,
-    required this.onChanged,
+    required this.controller,
   });
 
   @override
@@ -14,8 +14,8 @@ class RoundedConfirmPasswordField extends StatelessWidget {
     return TextFieldContainer(
         child: TextField(
       obscureText: true,
-      onChanged: onChanged,
-      decoration: InputDecoration(
+      controller: controller,
+      decoration: const InputDecoration(
           hintText: "Your confirm password",
           icon: Icon(
             Icons.lock,

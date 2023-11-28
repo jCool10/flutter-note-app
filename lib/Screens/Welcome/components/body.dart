@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:note_list_app/Screens/Login/login_screen.dart';
 import 'package:note_list_app/Screens/SignUp/signup_screen.dart';
 import 'package:note_list_app/Screens/Welcome/components/background.dart';
 import 'package:note_list_app/components/rounded_button.dart';
 import 'package:note_list_app/contants.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class Body extends StatelessWidget {
+  const Body({super.key});
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -18,7 +20,7 @@ class Body extends StatelessWidget {
             SizedBox(
               height: size.height * 0.1,
             ),
-            Text(
+            const Text(
               "WELCOME BACK !",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 26),
             ),
@@ -40,7 +42,7 @@ class Body extends StatelessWidget {
               press: () {
                 Navigator.push(context, MaterialPageRoute(
                   builder: (context) {
-                    return LoginScreen();
+                    return const LoginScreen();
                   },
                 ));
               },

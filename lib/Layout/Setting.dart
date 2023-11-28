@@ -1,5 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:note_list_app/Models/AccountUser.dart';
+
+import '../services/firebase_service.dart';
 
 class Setting extends StatefulWidget {
   const Setting({super.key});
@@ -16,14 +20,7 @@ class _SettingState extends State<Setting> {
 
   late List<String> tags;
 
-  @override
-  void initState() {
-    super.initState();
-    _currentBrightness = Brightness.light;
-    //from data
-    account = AccountUser('avarta.jpeg', "Anna Mie", 'abc@gmail.com', true);
-    tags = ['Spend', 'Work', 'School', 'Exercise', 'Bank'];
-  }
+  late final FirebaseAuth auth;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +31,8 @@ class _SettingState extends State<Setting> {
       iconTheme: const IconThemeData(color: Colors.black, opacity: 1),
       buttonTheme: const ButtonThemeData(
         buttonColor: Colors.orange,
-        textTheme: ButtonTextTheme.primary,),
+        textTheme: ButtonTextTheme.primary,
+      ),
     );
     final darkTheme = ThemeData(
       primaryColor: Colors.black,
@@ -50,7 +48,9 @@ class _SettingState extends State<Setting> {
     return Theme(
       data: _currentBrightness == Brightness.light ? lightTheme : darkTheme,
       child: Scaffold(
-        backgroundColor: (_currentBrightness == Brightness.light) ? Colors.blue[100]: Colors.grey[500],
+        backgroundColor: (_currentBrightness == Brightness.light)
+            ? Colors.blue[100]
+            : Colors.grey[500],
         appBar: AppBar(
           title: const Text(
             "Setting",
@@ -95,42 +95,79 @@ class _SettingState extends State<Setting> {
                 height: 200,
                 child: DrawerHeader(
                   decoration: BoxDecoration(
-                    color: (_currentBrightness == Brightness.light) ? Colors.white: Colors.grey[900],
+                    color: (_currentBrightness == Brightness.light)
+                        ? Colors.white
+                        : Colors.grey[900],
                   ),
                   child: Column(
                     children: [
                       CircleAvatar(
                         backgroundImage: AssetImage('assets/${account.image}'),
-                        radius:  40.0,
+                        radius: 40.0,
                       ),
-                      const Divider(height: 10,
-                      color: Colors.black,),
-                      Text(account.name,
-                      style: TextStyle(
-                        fontFamily: 'Pacifico',
-                        fontSize: 15.0,
-                        color: (_currentBrightness == Brightness.light) ? Colors.black: Colors.white),
-                      ),
-                      Text(account.mail,
-                      style: TextStyle(
-                        // fontFamily: 'Pacifico',
-                        fontSize: 15.0,
-                        color: (_currentBrightness == Brightness.light) ? Colors.black: Colors.white
-                      ),),
-                      Text('Status: ${(account.status) ? 'online':'offline'}' ,
-                      style: TextStyle(
-                        // fontFamily: 'Pacifico',
-                        fontSize: 15.0,
-                        color: (_currentBrightness == Brightness.light) ? Colors.black: Colors.white
-                      ),),
+                      StreamBuilder(
+                          stream: FirebaseService().getNotesStream(),
+                          builder: (context,
+                              AsyncSnapshot<
+                                      DocumentSnapshot<Map<String, dynamic>>>
+                                  snapshot) {
+                            if (snapshot.hasData) {
+                              final data =
+                                  snapshot.data!.data() as Map<String, dynamic>;
+                              final profile =
+                                  data['user_profile'] as Map<String, dynamic>;
+                              return Column(
+                                children: [
+                                  Text(
+                                    profile['name'],
+                                    style: TextStyle(
+                                        fontFamily: 'Pacifico',
+                                        fontSize: 15.0,
+                                        color: (_currentBrightness ==
+                                                Brightness.light)
+                                            ? Colors.black
+                                            : Colors.white),
+                                  ),
+                                  const Divider(
+                                    height: 10,
+                                    color: Colors.black,
+                                  ),
+                                  Text(
+                                    profile['email'],
+                                    style: TextStyle(
+                                        fontFamily: 'Pacifico',
+                                        fontSize: 15.0,
+                                        color: (_currentBrightness ==
+                                                Brightness.light)
+                                            ? Colors.black
+                                            : Colors.white),
+                                  ),
+                                  Text(
+                                    'Status: ${auth.currentUser!.emailVerified ? 'online' : 'offline'}',
+                                    style: TextStyle(
+                                        fontFamily: 'Pacifico',
+                                        fontSize: 15.0,
+                                        color: (_currentBrightness ==
+                                                Brightness.light)
+                                            ? Colors.black
+                                            : Colors.white),
+                                  ),
+                                ],
+                              );
+                            }
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          })
                     ],
-                  ), 
+                  ),
                 ),
               ),
               ListTile(
                 title: const Row(children: [
                   Icon(Icons.card_membership),
-                   SizedBox(width: 30,),
+                  SizedBox(
+                    width: 30,
+                  ),
                   Text('Card')
                 ]),
                 onTap: () {
@@ -141,7 +178,9 @@ class _SettingState extends State<Setting> {
               ListTile(
                 title: const Row(children: [
                   Icon(Icons.delete),
-                   SizedBox(width: 30,),
+                  SizedBox(
+                    width: 30,
+                  ),
                   Text('Trash')
                 ]),
                 onTap: () {
@@ -149,12 +188,16 @@ class _SettingState extends State<Setting> {
                   Navigator.pop(context); // Close the drawer
                 },
               ),
-              Container(height: 1,
-              color: Colors.black,),
+              Container(
+                height: 1,
+                color: Colors.black,
+              ),
               ListTile(
                 title: const Row(children: [
                   Icon(Icons.account_circle),
-                   SizedBox(width: 30,),
+                  SizedBox(
+                    width: 30,
+                  ),
                   Text('Account')
                 ]),
                 onTap: () {
@@ -165,29 +208,40 @@ class _SettingState extends State<Setting> {
               ListTile(
                 title: Row(children: [
                   const Icon(Icons.dark_mode),
-                  const SizedBox(width: 30,),
-                  Text('Dark Mode: ${_currentBrightness == Brightness.dark ? 'On' : 'Off'}'),
-                  const SizedBox(width: 30,),
+                  const SizedBox(
+                    width: 30,
+                  ),
+                  Text(
+                      'Dark Mode: ${_currentBrightness == Brightness.dark ? 'On' : 'Off'}'),
+                  const SizedBox(
+                    width: 30,
+                  ),
                   Switch(
                     value: _isDarkModeEnabled,
                     onChanged: (value) {
                       setState(() {
-                          _currentBrightness = (_currentBrightness == Brightness.light) ? Brightness.dark : Brightness.light;
+                        _currentBrightness =
+                            (_currentBrightness == Brightness.light)
+                                ? Brightness.dark
+                                : Brightness.light;
                       });
                     },
                   ),
                 ]),
                 onTap: () {
-                 
                   Navigator.pop(context); // Close the drawer
                 },
               ),
-              Container(height: 1,
-              color: Colors.black,),
+              Container(
+                height: 1,
+                color: Colors.black,
+              ),
               ListTile(
                 title: const Row(children: [
                   Icon(Icons.settings),
-                  SizedBox(width: 30,),
+                  SizedBox(
+                    width: 30,
+                  ),
                   Text('Settting')
                 ]),
                 onTap: () {
@@ -206,132 +260,173 @@ class _SettingState extends State<Setting> {
               children: [
                 Card(
                   shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0), // Đặt độ cong là 0.0 để có góc vuông
-                      ),
+                    borderRadius: BorderRadius.circular(
+                        10.0), // Đặt độ cong là 0.0 để có góc vuông
+                  ),
                   elevation: 5,
-                  margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-                  color: (_currentBrightness == Brightness.light) ? Colors.yellowAccent[100]: Colors.grey[500],
+                  margin:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                  color: (_currentBrightness == Brightness.light)
+                      ? Colors.yellowAccent[100]
+                      : Colors.grey[500],
                   child: Column(
                     children: [
-                      const Center(child: Text('Tags',
-                      style: TextStyle(
-                        fontFamily: 'VinaSans',
-                        fontSize: 30.0,
-                        fontWeight: FontWeight.bold,
-                      )),
+                      const Center(
+                        child: Text('Tags',
+                            style: TextStyle(
+                              fontFamily: 'VinaSans',
+                              fontSize: 30.0,
+                              fontWeight: FontWeight.bold,
+                            )),
                       ),
-                      const SizedBox(height: 10,),
+                      const SizedBox(
+                        height: 10,
+                      ),
                       Container(
-                        color: (_currentBrightness == Brightness.light) ? Colors.white: Colors.grey[500],
+                        color: (_currentBrightness == Brightness.light)
+                            ? Colors.white
+                            : Colors.grey[500],
                         child: Column(
                           children: [
                             InkWell(
-                              onTap: ()
-                              {
+                              onTap: () {
                                 // Show Text input and add tag
                               },
                               child: Card(
                                 shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(0.0), // Đặt góc vuông ở đây
-                                  ),
+                                  borderRadius: BorderRadius.circular(
+                                      0.0), // Đặt góc vuông ở đây
+                                ),
                                 child: const Row(children: [
                                   Icon(Icons.add),
-                                  SizedBox(width: 20,),
+                                  SizedBox(
+                                    width: 20,
+                                  ),
                                   Text('Add Tag'),
                                 ]),
                               ),
-                            ),   
+                            ),
                             Wrap(
-                            spacing: 0.0,
-                            runSpacing: 0.0,
-                            children: tags.map((tag) {
-                            return Card(
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(0.0), // Đặt góc vuông ở đây
-                                      ),
-
-                                    child: Row(children: [
-                                      const Icon(Icons.tag),
-                                      const SizedBox(width: 20,),
-                                      Text(tag),
-                                      Expanded(
-                                        child: Align(
-                                          alignment: Alignment.centerRight,
-                                          child: IconButton(
-                                            icon: const Icon(Icons.more_vert),
-                                            onPressed: (){
-                                              // show dialog delete, edit
-                                            },
-                                          ),
+                              spacing: 0.0,
+                              runSpacing: 0.0,
+                              children: tags.map((tag) {
+                                return Card(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                        0.0), // Đặt góc vuông ở đây
+                                  ),
+                                  child: Row(children: [
+                                    const Icon(Icons.tag),
+                                    const SizedBox(
+                                      width: 20,
+                                    ),
+                                    Text(tag),
+                                    Expanded(
+                                      child: Align(
+                                        alignment: Alignment.centerRight,
+                                        child: IconButton(
+                                          icon: const Icon(Icons.more_vert),
+                                          onPressed: () {
+                                            // show dialog delete, edit
+                                          },
                                         ),
-                                      )
-                                    ]),
-                                  );
+                                      ),
+                                    )
+                                  ]),
+                                );
                               }).toList(),
                             ),
-                          ],),
+                          ],
                         ),
-                    ],),
-                ),
-                
-                const SizedBox(height: 30,),
-                Card(
-                  shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0), // Đặt độ cong là 0.0 để có góc vuông
                       ),
-                  elevation: 5,
-                  margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-                  color: (_currentBrightness == Brightness.light) ? Colors.yellowAccent[100]: Colors.grey[500],
-                  child: Column(
-                    children: [
-                      const Center(child: Text('About',
-                      style: TextStyle(
-                        fontFamily: 'VinaSans',
-                        fontSize: 30.0,
-                        fontWeight: FontWeight.bold,
-                      ),),),
-                      const SizedBox(height: 10,),
-                      Container(
-                        color: (_currentBrightness == Brightness.light) ? Colors.white: Colors.grey[500],
-                        child: InkWell(
-                                onTap: ()
-                                {
-                                  // open browser
-                                },
-                                child: Card(
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(0.0), // Đặt góc vuông ở đây
-                                    ),
-                                  child: const Row(children: [
-                                    Icon(Icons.info),
-                                    SizedBox(width: 20,),
-                                    Text('About us'),
-                                  ]),
-                                ),
-                              ),
-                      ),   
                     ],
                   ),
                 ),
-            ],),
+                const SizedBox(
+                  height: 30,
+                ),
+                Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                        10.0), // Đặt độ cong là 0.0 để có góc vuông
+                  ),
+                  elevation: 5,
+                  margin:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                  color: (_currentBrightness == Brightness.light)
+                      ? Colors.yellowAccent[100]
+                      : Colors.grey[500],
+                  child: Column(
+                    children: [
+                      const Center(
+                        child: Text(
+                          'About',
+                          style: TextStyle(
+                            fontFamily: 'VinaSans',
+                            fontSize: 30.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Container(
+                        color: (_currentBrightness == Brightness.light)
+                            ? Colors.white
+                            : Colors.grey[500],
+                        child: InkWell(
+                          onTap: () {
+                            // open browser
+                          },
+                          child: Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  0.0), // Đặt góc vuông ở đây
+                            ),
+                            child: const Row(children: [
+                              Icon(Icons.info),
+                              SizedBox(
+                                width: 20,
+                              ),
+                              Text('About us'),
+                            ]),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
+  @override
+  Future<void> initState() async {
+    super.initState();
+    _currentBrightness = Brightness.light;
+    //from data
+    FirebaseService().getNotesStream();
+    // account = AccountUser('avarta.jpeg', "Anna Mie", 'abc@gmail.com', true);
+    tags = ['Spend', 'Work', 'School', 'Exercise', 'Bank'];
+  }
+
   void _handleMenuItemClick(String menuItem) {
     // Handle menu item click based on the selected item
     print("Selected item: $menuItem");
-    switch(menuItem) {
+    switch (menuItem) {
       case 'Logout':
-      // Move to Signin layout
+        // Move to Signin layout
         break;
       case 'More info':
-      // Open link
+        // Open link
         break;
       case 'Help':
-      // Open link
+        // Open link
         break;
       default:
     }

@@ -1,18 +1,25 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:note_list_app/Layout/Account.dart';
-import 'package:note_list_app/Layout/CreateNote.dart';
-import 'package:note_list_app/Layout/Setting.dart';
 import 'package:note_list_app/Layout/ViewCard.dart';
-import 'package:note_list_app/Layout/ViewNote.dart';
-import 'package:note_list_app/Screens/Welcome/welcome_screen.dart';
+import 'package:note_list_app/Screens/Login/login_screen.dart';
+import 'package:note_list_app/Screens/SignUp/signup_screen.dart';
 import 'package:note_list_app/contants.dart';
+import 'package:note_list_app/utils/auth.dart';
+import 'package:note_list_app/utils/auth_guard.dart';
 
-void main() {
-  
+import 'firebase_options.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(const MaterialApp(
     home: Home(),
   ));
 }
+
 class Home extends StatefulWidget {
   const Home({super.key});
 
@@ -32,7 +39,30 @@ class _HomeState extends State<Home> {
       theme: ThemeData(
           primaryColor: kPrimaryColor, scaffoldBackgroundColor: Colors.white),
       // Routing here
-      home: WelcomeScreen(),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const MyAuth(),
+        '/login': (context) => FutureBuilder<bool>(
+              future: AuthGuard.isAuthenticated(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData && snapshot.data!) {
+                  return const ViewCard();
+                } else {
+                  return const LoginScreen();
+                }
+              },
+            ),
+        '/signup': (context) => FutureBuilder<bool>(
+              future: AuthGuard.isAuthenticated(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData && snapshot.data!) {
+                  return const ViewCard();
+                } else {
+                  return const SignupScreen();
+                }
+              },
+            ),
+      },
     );
   }
 }
