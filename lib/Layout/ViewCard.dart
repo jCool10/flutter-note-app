@@ -1,9 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:note_list_app/Layout/CreateNote.dart';
+import 'package:note_list_app/Layout/ViewNote.dart';
+import 'package:note_list_app/Models/note.dart';
+import 'package:note_list_app/components/note_drawer.dart';
 import 'package:searchfield/searchfield.dart';
 
-import '../../../services/firebase_service.dart';
+import '../Models/note.dart';
+import '../services/firebaseService.dart';
 
 class ViewCard extends StatefulWidget {
   const ViewCard({
@@ -15,20 +20,22 @@ class ViewCard extends StatefulWidget {
 }
 
 class _ViewCard extends State<ViewCard> {
-  late List<Map<String, String>> items;
+  List<Note> items = [];
+  // late List<Map<String, String>> items;
   late List<String> search;
   late List<String> images;
 
-  late Brightness _currentBrightness;
-  final bool _isDarkModeEnabled = false;
+  late Brightness currentBrightness;
 
   late bool isGridView;
 
+  late final FirebaseAuth auth;
+
   @override
   Widget build(BuildContext context) {
-    items.sort((a, b) => a["pin"]!.compareTo(b["pin"]!));
-    var notesPinned = items.where((item) => item["pin"] == 'true').toList();
-    var notes = items.where((item) => item["pin"] == 'false').toList();
+    var notesPinned = items.where((item) => item.pinned == true).toList();
+    var notes = items.where((item) => item.pinned == false).toList();
+
     //theme
     final lightTheme = ThemeData(
       primaryColor: Colors.white,
@@ -52,9 +59,9 @@ class _ViewCard extends State<ViewCard> {
     );
 
     return Theme(
-      data: _currentBrightness == Brightness.light ? lightTheme : darkTheme,
+      data: currentBrightness == Brightness.light ? lightTheme : darkTheme,
       child: Scaffold(
-        backgroundColor: (_currentBrightness == Brightness.light)
+        backgroundColor: (currentBrightness == Brightness.light)
             ? Colors.blue[100]
             : Colors.grey[500],
         appBar: AppBar(
@@ -125,149 +132,7 @@ class _ViewCard extends State<ViewCard> {
           label: const Text('Create note'),
           backgroundColor: Colors.grey,
         ),
-        drawer: Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              SizedBox(
-                height: 200,
-                child: DrawerHeader(
-                  decoration: BoxDecoration(
-                    color: (_currentBrightness == Brightness.light)
-                        ? Colors.white
-                        : Colors.grey[900],
-                  ),
-                  child: Column(
-                    children: [
-                      CircleAvatar(
-                        backgroundImage: AssetImage('assets/${images[0]}'),
-                        radius: 40.0,
-                      ),
-                      const Divider(
-                        height: 10,
-                        color: Colors.black,
-                      ),
-                      Text(
-                        "Anna Mie",
-                        style: TextStyle(
-                            fontFamily: 'Pacifico',
-                            fontSize: 15.0,
-                            color: (_currentBrightness == Brightness.light)
-                                ? Colors.black
-                                : Colors.white),
-                      ),
-                      Text(
-                        "abc@gmail.com",
-                        style: TextStyle(
-                            // fontFamily: 'Pacifico',
-                            fontSize: 15.0,
-                            color: (_currentBrightness == Brightness.light)
-                                ? Colors.black
-                                : Colors.white),
-                      ),
-                      Text(
-                        "Status: online",
-                        style: TextStyle(
-                            // fontFamily: 'Pacifico',
-                            fontSize: 15.0,
-                            color: (_currentBrightness == Brightness.light)
-                                ? Colors.black
-                                : Colors.white),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              ListTile(
-                title: const Row(children: [
-                  Icon(Icons.card_membership),
-                  SizedBox(
-                    width: 30,
-                  ),
-                  Text('Card')
-                ]),
-                onTap: () {
-                  // Handle item 1 tap
-                  Navigator.pop(context); // Close the drawer
-                },
-              ),
-              ListTile(
-                title: const Row(children: [
-                  Icon(Icons.delete),
-                  SizedBox(
-                    width: 30,
-                  ),
-                  Text('Trash')
-                ]),
-                onTap: () {
-                  // Handle item 1 tap
-                  Navigator.pop(context); // Close the drawer
-                },
-              ),
-              Container(
-                height: 1,
-                color: Colors.black,
-              ),
-              ListTile(
-                title: const Row(children: [
-                  Icon(Icons.account_circle),
-                  SizedBox(
-                    width: 30,
-                  ),
-                  Text('Account')
-                ]),
-                onTap: () {
-                  // Handle item 1 tap
-                  Navigator.pop(context); // Close the drawer
-                },
-              ),
-              ListTile(
-                title: Row(children: [
-                  const Icon(Icons.dark_mode),
-                  const SizedBox(
-                    width: 30,
-                  ),
-                  Text(
-                      'Dark Mode: ${_currentBrightness == Brightness.dark ? 'On' : 'Off'}'),
-                  const SizedBox(
-                    width: 30,
-                  ),
-                  Switch(
-                    value: _isDarkModeEnabled,
-                    onChanged: (value) {
-                      setState(() {
-                        _currentBrightness =
-                            (_currentBrightness == Brightness.light)
-                                ? Brightness.dark
-                                : Brightness.light;
-                      });
-                    },
-                  ),
-                ]),
-                onTap: () {
-                  Navigator.pop(context); // Close the drawer
-                },
-              ),
-              Container(
-                height: 1,
-                color: Colors.black,
-              ),
-              ListTile(
-                title: const Row(children: [
-                  Icon(Icons.settings),
-                  SizedBox(
-                    width: 30,
-                  ),
-                  Text('Settting')
-                ]),
-                onTap: () {
-                  // Handle item 3 tap
-                  Navigator.pop(context); // Close the drawer
-                },
-              ),
-            ],
-          ),
-        ),
+        drawer: const DrawerWidget(),
         body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(30, 20, 30, 0),
@@ -278,7 +143,7 @@ class _ViewCard extends State<ViewCard> {
                   elevation: 5,
                   margin:
                       const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-                  color: (_currentBrightness == Brightness.light)
+                  color: (currentBrightness == Brightness.light)
                       ? Colors.yellowAccent[100]
                       : Colors.grey[500],
                   child: Column(
@@ -317,7 +182,7 @@ class _ViewCard extends State<ViewCard> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          notesPinned[index]["title"] ?? "",
+                                          notesPinned[index].title ?? "",
                                           style: const TextStyle(
                                             fontSize: 20.0,
                                             fontWeight: FontWeight.bold,
@@ -326,7 +191,7 @@ class _ViewCard extends State<ViewCard> {
                                         ),
                                         Container(
                                           height: 2,
-                                          color: (_currentBrightness ==
+                                          color: (currentBrightness ==
                                                   Brightness.light)
                                               ? Colors.grey[500]
                                               : Colors.white,
@@ -334,11 +199,17 @@ class _ViewCard extends State<ViewCard> {
                                       ],
                                     ),
                                     subtitle: Text(
-                                        "Date: ${notesPinned[index]["date"] ?? ""}"),
+                                        "Date: ${notesPinned[index].dateCreated ?? ""}"),
                                     trailing: const Text('Work'),
                                     onTap: () {
                                       // Handle item tap
                                       // print("Tapped on ${notesPinned[index]["title"]}");
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                ViewNote(note: notes[index])),
+                                      );
                                     },
                                   ),
                                 ],
@@ -365,7 +236,7 @@ class _ViewCard extends State<ViewCard> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          note["title"] ?? "",
+                                          note.title ?? "",
                                           style: const TextStyle(
                                             fontSize: 20.0,
                                             fontWeight: FontWeight.bold,
@@ -374,7 +245,7 @@ class _ViewCard extends State<ViewCard> {
                                         ),
                                         Container(
                                           height: 2,
-                                          color: (_currentBrightness ==
+                                          color: (currentBrightness ==
                                                   Brightness.light)
                                               ? Colors.grey[500]
                                               : Colors.white,
@@ -382,11 +253,17 @@ class _ViewCard extends State<ViewCard> {
                                       ],
                                     ),
                                     subtitle:
-                                        Text("Date: ${note["date"] ?? ""}"),
+                                        Text("Date: ${note.dateCreated ?? ""}"),
                                     trailing: const Text('Work'),
                                     onTap: () {
                                       // Handle item tap
                                       // print("Tapped on ${notesPinned[index]["title"]}");
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                ViewNote(note: note)),
+                                      );
                                     },
                                   ),
                                 ],
@@ -404,7 +281,7 @@ class _ViewCard extends State<ViewCard> {
                   elevation: 5,
                   margin:
                       const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-                  color: (_currentBrightness == Brightness.light)
+                  color: (currentBrightness == Brightness.light)
                       ? Colors.yellowAccent[100]
                       : Colors.grey[500],
                   child: Column(
@@ -442,7 +319,7 @@ class _ViewCard extends State<ViewCard> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          notes[index]["title"] ?? "",
+                                          notes[index].title ?? "",
                                           style: const TextStyle(
                                             fontSize: 20.0,
                                             fontWeight: FontWeight.bold,
@@ -452,7 +329,7 @@ class _ViewCard extends State<ViewCard> {
                                         Container(
                                           height:
                                               2, // Set the height of the divider line
-                                          color: (_currentBrightness ==
+                                          color: (currentBrightness ==
                                                   Brightness.light)
                                               ? Colors.grey[500]
                                               : Colors.white,
@@ -460,11 +337,17 @@ class _ViewCard extends State<ViewCard> {
                                       ],
                                     ),
                                     subtitle: Text(
-                                        "Date: ${notes[index]["date"] ?? ""}"),
+                                        "Date: ${notes[index].dateCreated ?? ""}"),
                                     trailing: const Text('School'),
                                     onTap: () {
                                       // Handle item tap
-                                      // print("Tapped on ${notes[index]["title"]}");
+                                      print("Tapped on ${notes[index].title}");
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                ViewNote(note: notes[index])),
+                                      );
                                     },
                                   ),
                                 ],
@@ -491,7 +374,7 @@ class _ViewCard extends State<ViewCard> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          note["title"] ?? "",
+                                          note.title ?? "",
                                           style: const TextStyle(
                                             fontSize: 20.0,
                                             fontWeight: FontWeight.bold,
@@ -501,7 +384,7 @@ class _ViewCard extends State<ViewCard> {
                                         Container(
                                           height:
                                               2, // Set the height of the divider line
-                                          color: (_currentBrightness ==
+                                          color: (currentBrightness ==
                                                   Brightness.light)
                                               ? Colors.grey[500]
                                               : Colors.white,
@@ -509,11 +392,17 @@ class _ViewCard extends State<ViewCard> {
                                       ],
                                     ),
                                     subtitle:
-                                        Text("Date: ${note["date"] ?? ""}"),
+                                        Text("Date: ${note.dateCreated ?? ""}"),
                                     trailing: const Text('School'),
                                     onTap: () {
                                       // Handle item tap
-                                      // print("Tapped on ${notes[index]["title"]}");
+                                      print("Tapped on ${note.title}");
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                ViewNote(note: note)),
+                                      );
                                     },
                                   ),
                                 ],
@@ -535,20 +424,52 @@ class _ViewCard extends State<ViewCard> {
     );
   }
 
+  Future<void> getNote() async {
+    var response = await FirebaseService().getNotes();
+    setState(() {
+      items = response;
+      search = items.map((item) => item.title ?? '').toList();
+    });
+  }
+
+  // Future<void> getNote() async {
+  //   var response = await FirebaseService().getNotes().then((value) {
+  //     print(value);
+  //     setState(() {
+  //       items = value;
+  //     });
+  //   });
+  //   print('items $items');
+  // }
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   currentBrightness = Brightness.light;
+  //   // items = [
+  //   //   {"title": "Meeting", "date": "2023-11-27", "pin": "false"},
+  //   //   {"title": "Appointment", "date": "2023-11-28", "pin": "false"},
+  //   //   {"title": "Event", "date": "2023-11-29", "pin": "true"},
+  //   //   {"title": "Deadline", "date": "2023-11-30", "pin": "false"},
+  //   //   {"title": "Project Kick-off", "date": "2023-12-01", "pin": "true"},
+  //   // ];
+  //   items = [];
+  //   // items = aw getNote() as List<Map<String, String>>;
+  //   getNote();
+
+  //   search = items.map((item) => item.title ?? '').toList();
+
+  //   images = ['avarta.jpeg'];
+  //   isGridView = true;
+  // }
+
   @override
   void initState() {
     super.initState();
-    _currentBrightness = Brightness.light;
-    items = [
-      {"title": "Meeting", "date": "2023-11-27", "pin": "false"},
-      {"title": "Appointment", "date": "2023-11-28", "pin": "false"},
-      {"title": "Event", "date": "2023-11-29", "pin": "true"},
-      {"title": "Deadline", "date": "2023-11-30", "pin": "false"},
-      {"title": "Project Kick-off", "date": "2023-12-01", "pin": "true"},
-    ];
-    search = items.map((item) => item['title'] ?? '').toList();
-
-    images = ['avarta.jpeg'];
+    getNote();
+    currentBrightness = Brightness.light;
+    // items = [];
+    search = [];
     isGridView = true;
   }
 
@@ -624,6 +545,7 @@ class _ViewCard extends State<ViewCard> {
             TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
+
                   // move to view note layout
                   // title has from SearchField
                 },

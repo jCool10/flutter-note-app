@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:note_list_app/Models/AccountUser.dart';
 
-import '../services/firebase_service.dart';
+import '../services/firebaseService.dart';
 
 class Setting extends StatefulWidget {
   const Setting({super.key});

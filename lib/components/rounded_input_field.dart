@@ -5,7 +5,7 @@ import 'package:note_list_app/contants.dart';
 class RoundedInputField extends StatelessWidget {
   final String hintText;
   final IconData icon;
-  final TextEditingController controller;
+  final TextEditingController? controller;
   final String? Function(String?)? validator;
   final bool obscureText;
 
@@ -13,7 +13,7 @@ class RoundedInputField extends StatelessWidget {
     super.key,
     required this.hintText,
     this.icon = Icons.person,
-    required this.controller,
+    this.controller,
     this.validator,
     this.obscureText = false,
   });

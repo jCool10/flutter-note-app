@@ -12,7 +12,7 @@ import 'package:note_list_app/components/rounded_input_field.dart';
 import '../../../components/already_have_an_account.dart';
 import '../../../components/already_have_an_account.dart';
 import '../../../contants.dart';
-import '../../../services/firebase_service.dart';
+import '../../../services/firebaseService.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({

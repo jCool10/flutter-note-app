@@ -5,7 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:note_list_app/Layout/ViewCard.dart';
-import 'package:note_list_app/services/firebase_service.dart';
+import 'package:note_list_app/components/note_drawer.dart';
+import 'package:note_list_app/services/firebaseService.dart';
 
 String generateNumericUuid() {
   final random = Random();
@@ -27,14 +28,15 @@ class _CreateNoteState extends State<CreateNote> {
   String uuid = generateNumericUuid();
   final String _pickedDate = '';
   final String _pickedTime = '';
+  final FirebaseService _firebaseService = FirebaseService();
 
   List<String> tags = <String>[];
   List<String> selectedTags = <String>[];
 
   // Config Text
-  double _fontSize = 16.0;
-  FontWeight _fontWeight = FontWeight.normal;
-  FontStyle _fontStyle = FontStyle.normal;
+  final double _fontSize = 16.0;
+  final FontWeight _fontWeight = FontWeight.normal;
+  final FontStyle _fontStyle = FontStyle.normal;
   Color _textColor = Colors.black;
   // Style config
   late TextStyle _titleStyle;
@@ -131,9 +133,9 @@ class _CreateNoteState extends State<CreateNote> {
                           // -> move on view note layout and save data
                           await FirebaseService().addNote(
                             uuid: uuid,
-                            title: _titleController.text,
-                            controller: _controller,
-                            selectedTags: selectedTags,
+                            title: _titleInput.text,
+                            content: _notesInput.text,
+                            selectedTags: [selectedItem],
                             reminder: _pickedDate == '' || _pickedTime == ''
                                 ? ''
                                 : '$_pickedDate $_pickedTime',
@@ -147,6 +149,11 @@ class _CreateNoteState extends State<CreateNote> {
                           ));
                           _notesInput.text = '';
                           _titleInput.text = '';
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const ViewCard()),
+                          );
                         }
                       },
                     ),
@@ -199,147 +206,20 @@ class _CreateNoteState extends State<CreateNote> {
                 ),
               ),
             ],
-          ),
-          drawer: Drawer(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                SizedBox(
-                  height: 200,
-                  child: DrawerHeader(
-                    decoration: BoxDecoration(
-                      color: (_currentBrightness == Brightness.light)
-                          ? Colors.white
-                          : Colors.grey[900],
-                    ),
-                    child: Column(
-                      children: [
-                        CircleAvatar(
-                          backgroundImage: AssetImage('assets/${images[0]}'),
-                          radius: 40.0,
-                        ),
-                        const Divider(
-                          height: 10,
-                          color: Colors.black,
-                        ),
-                        Text(
-                          "Anna Mie",
-                          style: TextStyle(
-                              fontFamily: 'Pacifico',
-                              fontSize: 15.0,
-                              color: (_currentBrightness == Brightness.light)
-                                  ? Colors.black
-                                  : Colors.white),
-                        ),
-                        Text(
-                          "abc@gmail.com",
-                          style: TextStyle(
-                              // fontFamily: 'Pacifico',
-                              fontSize: 15.0,
-                              color: (_currentBrightness == Brightness.light)
-                                  ? Colors.black
-                                  : Colors.white),
-                        ),
-                        Text(
-                          "Status: online",
-                          style: TextStyle(
-                              // fontFamily: 'Pacifico',
-                              fontSize: 15.0,
-                              color: (_currentBrightness == Brightness.light)
-                                  ? Colors.black
-                                  : Colors.white),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                ListTile(
-                  title: const Row(children: [
-                    Icon(Icons.card_membership),
-                    SizedBox(
-                      width: 30,
-                    ),
-                    Text('Card')
-                  ]),
-                  onTap: () {
-                    Navigator.pop(context); // Close the drawer
-                  },
-                ),
-                ListTile(
-                  title: const Row(children: [
-                    Icon(Icons.delete),
-                    SizedBox(
-                      width: 30,
-                    ),
-                    Text('Trash')
-                  ]),
-                  onTap: () {
-                    Navigator.pop(context); // Close the drawer
-                  },
-                ),
-                Container(
-                  height: 1,
-                  color: Colors.black,
-                ),
-                ListTile(
-                  title: const Row(children: [
-                    Icon(Icons.account_circle),
-                    SizedBox(
-                      width: 30,
-                    ),
-                    Text('Account')
-                  ]),
-                  onTap: () {
-                    Navigator.pop(context); // Close the drawer
-                  },
-                ),
-                ListTile(
-                  title: Row(children: [
-                    const Icon(Icons.dark_mode),
-                    const SizedBox(
-                      width: 30,
-                    ),
-                    Text(
-                        'Dark Mode: ${_currentBrightness == Brightness.dark ? 'On' : 'Off'}'),
-                    const SizedBox(
-                      width: 30,
-                    ),
-                    Switch(
-                      value: _isDarkModeEnabled,
-                      onChanged: (value) {
-                        setState(() {
-                          _currentBrightness =
-                              (_currentBrightness == Brightness.light)
-                                  ? Brightness.dark
-                                  : Brightness.light;
-                        });
-                      },
-                    ),
-                  ]),
-                  onTap: () {
-                    Navigator.pop(context); // Close the drawer
-                  },
-                ),
-                Container(
-                  height: 1,
-                  color: Colors.black,
-                ),
-                ListTile(
-                  title: const Row(children: [
-                    Icon(Icons.settings),
-                    SizedBox(
-                      width: 30,
-                    ),
-                    Text('Settting')
-                  ]),
-                  onTap: () {
-                    // Handle item 3 tap
-                    Navigator.pop(context); // Close the drawer
-                  },
-                ),
-              ],
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                // Quay lại màn hình trước đó khi nhấn nút
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ViewCard()),
+                );
+              },
             ),
           ),
+
+          // drawer: const DrawerWidget(),
+
           body: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(30, 20, 30, 0),
@@ -390,8 +270,11 @@ class _CreateNoteState extends State<CreateNote> {
                             );
                           }).toList(),
                           onChanged: (String? newValue) {
+                            // print(values);
                             if (newValue != null) {
+                              // setState(() {
                               selectedItem = newValue;
+                              // });
                             }
                           },
                         ),
@@ -400,59 +283,6 @@ class _CreateNoteState extends State<CreateNote> {
                   ],
                 ),
 
-                const SizedBox(height: 16.0),
-                Row(
-                  children: [
-                    Slider(
-                      value: _fontSize,
-                      min: 10.0,
-                      max: 30.0,
-                      onChanged: (value) {
-                        setState(() {
-                          _fontSize = value;
-                        });
-                      },
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          _fontWeight = _fontWeight == FontWeight.normal
-                              ? FontWeight.bold
-                              : FontWeight.normal;
-                        });
-                      },
-                      child: const Icon(Icons.format_bold),
-                    ),
-                    const SizedBox(width: 8.0),
-                    ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          _fontStyle = _fontStyle == FontStyle.normal
-                              ? FontStyle.italic
-                              : FontStyle.normal;
-                        });
-                      },
-                      child: const Icon(Icons.format_italic),
-                    ),
-                    const SizedBox(width: 8.0),
-                    ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          _selectTextColor(context);
-                        });
-                      },
-                      child: const Icon(Icons.color_lens),
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Container(
-                    height: 2,
-                    color: (_currentBrightness == Brightness.light)
-                        ? Colors.grey[500]
-                        : Colors.white),
                 const SizedBox(
                   height: 20,
                 ),
@@ -488,8 +318,15 @@ class _CreateNoteState extends State<CreateNote> {
 
   @override
   void initState() {
-    super.initState();
     _currentBrightness = Brightness.light;
+
+    _firebaseService.getTags().then((value) {
+      print(value);
+      // setState(() {
+      //   tags = value;
+      // });
+    });
+
     tags = ['Spend', 'Work', 'School', 'Exercise', 'Bank'];
     selectedItem = 'Spend';
     images = ['avarta.jpeg'];
@@ -510,6 +347,7 @@ class _CreateNoteState extends State<CreateNote> {
     _focusNodeTitle = FocusNode();
     _notesInput = TextEditingController();
     _focusNodeNotes = FocusNode();
+    super.initState();
   }
 
   void _handleMenuItemClick(String menuItem) {

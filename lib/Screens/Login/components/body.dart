@@ -9,7 +9,7 @@ import 'package:note_list_app/components/rounded_input_field.dart';
 import 'package:note_list_app/components/rounded_password_fielld.dart';
 
 import '../../../components/already_have_an_account.dart';
-import '../../../services/firebase_service.dart';
+import '../../../services/firebaseService.dart';
 
 class Body extends StatefulWidget {
   const Body({

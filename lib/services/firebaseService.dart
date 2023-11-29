@@ -14,17 +14,16 @@ class FirebaseService {
   Future<void> addNote({
     required String uuid,
     required String title,
-    required QuillController controller,
     required List<String> selectedTags,
     required String reminder,
+    required String content,
   }) async {
     await _firestore.collection('notes').doc(_auth.currentUser!.uid).update({
       'user_notes': FieldValue.arrayUnion([
         {
           'id': uuid,
           'title': title,
-          'content': controller.document.toPlainText(),
-          'contentRich': jsonEncode(controller.document.toDelta().toJson()),
+          'content': content,
           'password': '',
           'tags': selectedTags,
           'trashed': false,
